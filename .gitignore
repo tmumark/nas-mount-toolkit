@@ -1,12 +1,7 @@
 .DS_Store
-測試篩選/
 
 # 含真實密碼的本地腳本
 mount_nas.command
 
-# 個人設定檔
-nas_config
-
 # Compiled AppleScript apps (can be rebuilt from .applescript source)
 FilterFolders.app/
-資料夾篩選工具.app/
