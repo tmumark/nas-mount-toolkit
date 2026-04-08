@@ -1,11 +1,11 @@
 .DS_Store
 測試篩選/
 
-# 個人設定檔（含密碼）
-nas_config
+# 含真實密碼的本地腳本
+mount_nas.command
 
-# 模板檔已移除（改用 nas_config.example + mount_nas.command）
-mount_nas_template.command
+# 個人設定檔
+nas_config
 
 # Compiled AppleScript apps (can be rebuilt from .applescript source)
 FilterFolders.app/

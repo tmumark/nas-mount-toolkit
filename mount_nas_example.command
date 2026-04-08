@@ -1,24 +1,8 @@
 #!/bin/bash
 
-# ============================
-# NAS SMB 快速掛載工具
-# ============================
-# 第一次使用請複製 nas_config.example 為 nas_config
-#   cp nas_config.example nas_config
-# 並填入你的 NAS 連線資訊
-
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_FILE="${SCRIPT_DIR}/nas_config"
-
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "找不到設定檔：nas_config"
-  echo "請先執行：cp nas_config.example nas_config"
-  echo "並填入你的 NAS 連線資訊"
-  read -p "按 Enter 關閉..."
-  exit 1
-fi
-
-source "$CONFIG_FILE"
+SMB_SERVER="YOUR_NAS_IP"
+SMB_USER="YOUR_USERNAME"
+SMB_PASS='YOUR_PASSWORD'
 
 mount_share() {
   local SHARE="$1"
@@ -39,16 +23,24 @@ echo "=============================="
 echo "  開始連接 NAS ($SMB_SERVER)"
 echo "=============================="
 
+SHARES=(
+  "相片"
+  "共用資料"
+  "個人備份及公共區"
+)
+
 FAIL_COUNT=0
 for SHARE in "${SHARES[@]}"; do
   mount_share "$SHARE" || ((FAIL_COUNT++))
 done
 
-# 連接成功後自動開啟常用子資料夾
-if [ -n "$AUTO_OPEN_PATH" ] && [ -d "$AUTO_OPEN_PATH" ]; then
+# 開啟常用子資料夾
+MAIN_SHARE="個人備份及公共區"
+SUB_PATH="個人備份區/Mark"
+if [ -d "/Volumes/${MAIN_SHARE}/${SUB_PATH}" ]; then
   echo ""
-  echo "開啟常用資料夾：${AUTO_OPEN_PATH}"
-  open "$AUTO_OPEN_PATH"
+  echo "開啟常用資料夾：${SUB_PATH}"
+  open "/Volumes/${MAIN_SHARE}/${SUB_PATH}"
 fi
 
 echo ""

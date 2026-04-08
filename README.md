@@ -4,14 +4,13 @@ macOS 上的 NAS 快速掛載與資料夾管理工具組，專為 Synology / QNA
 
 ## 功能
 
-### 1. NAS 快速掛載 (`mount_nas.command`)
+### 1. NAS 快速掛載 (`mount_nas_example.command`)
 
 雙擊即可一鍵掛載多個 SMB 共享資料夾，並自動開啟常用路徑。
 
 - 支援多個共享資料夾同時掛載
 - 每個掛載最多等待 15 秒，超時自動跳過
 - 掛載完成後自動開啟指定資料夾
-- 密碼與設定分離，不怕誤傳
 
 ### 2. 資料夾篩選工具 (`FilterFolders.applescript`)
 
@@ -27,6 +26,10 @@ macOS 上的 NAS 快速掛載與資料夾管理工具組，專為 Synology / QNA
 
 macOS 選單列常駐工具（Swift/SwiftUI 開發，原始碼已遺失）。
 
+- **連接 NAS** (⌘M) — 一鍵掛載 NAS 共享資料夾
+- **退出所有 NAS** (⌘U) — 一鍵卸載所有已掛載的 NAS
+- **開啟 Mark 資料夾** (⌘O) — 快速開啟個人資料夾
+- **結束 NAS MenuBar** (⌘Q)
 - 僅支援 Apple Silicon (arm64)
 
 ## 快速開始
@@ -34,26 +37,28 @@ macOS 選單列常駐工具（Swift/SwiftUI 開發，原始碼已遺失）。
 ### 安裝
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/nas-mount-toolkit.git
+git clone https://github.com/tmumark/nas-mount-toolkit.git
 cd nas-mount-toolkit
 ```
 
 ### 設定 NAS 連線
 
 ```bash
-# 複製設定範本
-cp nas_config.example nas_config
+# 複製範本並改名
+cp mount_nas_example.command mount_nas.command
 
-# 編輯設定檔，填入你的 NAS IP、帳號、密碼
-nano nas_config
+# 編輯腳本，將 YOUR_NAS_IP、YOUR_USERNAME、YOUR_PASSWORD 換成你的資訊
+nano mount_nas.command
+
+# 設定執行權限
+chmod +x mount_nas.command
 ```
 
 ### 掛載 NAS
 
 ```bash
-# 方法一：雙擊 mount_nas.command
+# 方法一：在 Finder 雙擊 mount_nas.command
 # 方法二：終端機執行
-chmod +x mount_nas.command
 ./mount_nas.command
 ```
 
@@ -68,17 +73,16 @@ chmod +x mount_nas.command
 
 ```
 .
-├── mount_nas.command          # NAS 掛載腳本
-├── nas_config.example         # 連線設定範本
-├── FilterFolders.applescript  # 資料夾篩選工具原始碼
-├── NASMenuBar.app/            # 選單列工具（arm64 binary）
+├── mount_nas_example.command   # NAS 掛載腳本（範本，需填入你的連線資訊）
+├── FilterFolders.applescript   # 資料夾篩選工具原始碼
+├── NASMenuBar.app/             # 選單列工具（arm64 binary）
 └── README.md
 ```
 
 ## 安全注意事項
 
-- `nas_config` 包含你的 NAS 密碼，已加入 `.gitignore`，不會被上傳
-- 請勿將密碼直接寫在腳本中
+- `mount_nas_example.command` 使用佔位符，不含真實密碼
+- 複製為 `mount_nas.command` 後填入密碼，該檔已加入 `.gitignore` 不會被上傳
 
 ## 系統需求
 
