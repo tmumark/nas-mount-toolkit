@@ -1,7 +1,12 @@
 .DS_Store
+.claude/
 
-# 含真實密碼的本地腳本
+# 含真實密碼的本地腳本（若沿用舊範例命名）
 mount_nas.command
+
+# 編譯產物
+menubar/build/
+NASMenuBar.app/
 
 # Compiled AppleScript apps (can be rebuilt from .applescript source)
 FilterFolders.app/

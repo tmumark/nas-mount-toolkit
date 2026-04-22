@@ -1,93 +1,105 @@
 # NAS Mount Toolkit
 
-macOS 上的 NAS 快速掛載與資料夾管理工具組，專為 Synology / QNAP 等家用 NAS 設計。
+macOS 上的 NAS 快速掛載與選單列工具組，整合 FortiClient VPN 狀態偵測、SMB 共享自動掛載、個人資料夾快速開啟。
+
+專為 Synology / QNAP 等家用 NAS 設計（透過 VPN 連線的情境）。
+
+## 專案內容
+
+```
+nas-mount-toolkit/
+├── menubar/                   # 原生 Swift 選單列 App（arm64）
+│   ├── AppDelegate.swift
+│   ├── ConnectionManager.swift
+│   ├── Info.plist
+│   └── build.sh               # 編譯／安裝腳本
+├── scripts/
+│   ├── mount-nas.sh           # 互動版：首次設定、存密碼到鑰匙圈
+│   └── mount-nas-silent.sh    # 靜默版：從鑰匙圈讀密碼，給 App 呼叫
+├── FilterFolders.applescript  # Finder 子資料夾篩選工具
+└── mount_nas_example.command  # 簡易雙擊掛載範本（舊版，已被上述取代）
+```
 
 ## 功能
 
-### 1. NAS 快速掛載 (`mount_nas_example.command`)
+### 1. NAS MenuBar（主要工具）
 
-雙擊即可一鍵掛載多個 SMB 共享資料夾，並自動開啟常用路徑。
+macOS 選單列常駐 App，原生 Swift/SwiftUI，狀態每 3 秒自動刷新：
 
-- 支援多個共享資料夾同時掛載
-- 每個掛載最多等待 15 秒，超時自動跳過
-- 掛載完成後自動開啟指定資料夾
+- 🟢 VPN 連線 + 三個共享全掛載
+- 🟠 VPN 連線但部分未掛載
+- 🔴 VPN 未連線
 
-### 2. 資料夾篩選工具 (`FilterFolders.applescript`)
+**選單項目：**
 
-在 Finder 中快速篩選子資料夾，只顯示你需要的。適合 NAS 上有大量資料夾的情境。
+| 項目 | 快捷鍵 |
+|---|---|
+| 📂 掛載 NAS | ⌘M |
+| ⏏ 卸載所有 NAS | ⌘U |
+| 📁 開啟 Mark 資料夾 | ⌘O |
+| 結束 | ⌘Q |
 
-- 自動偵測當前 Finder 視窗路徑
-- 輸入關鍵字清單，隱藏不符合的資料夾
-- 支援模糊比對（資料夾名稱包含關鍵字即匹配）
-- 一鍵還原所有隱藏的資料夾
-- 可編譯為 .app 放在 Finder 工具列
+**特色：**
+- 密碼從 macOS 鑰匙圈讀取，不硬寫在程式裡
+- 使用 `mount_smbfs` + percent-encoding，正確處理中文共享名
+- 掛載到 `~/NAS/`，避開 `/Volumes/` 權限問題
+- VPN 剛連上時自動掛載
 
-### 3. NAS MenuBar (`NASMenuBar.app`)
+### 2. 掛載腳本（`scripts/`）
 
-macOS 選單列常駐工具（Swift/SwiftUI 開發，原始碼已遺失）。
+若不想用選單列 App，可直接跑 shell 腳本：
 
-- **連接 NAS** (⌘M) — 一鍵掛載 NAS 共享資料夾
-- **退出所有 NAS** (⌘U) — 一鍵卸載所有已掛載的 NAS
-- **開啟 Mark 資料夾** (⌘O) — 快速開啟個人資料夾
-- **結束 NAS MenuBar** (⌘Q)
-- 僅支援 Apple Silicon (arm64)
+- `mount-nas.sh` — 互動版：首次用，會問帳密並存進鑰匙圈
+- `mount-nas-silent.sh` — 靜默版：後續執行，從鑰匙圈自動取密碼
+
+### 3. FilterFolders（輔助工具）
+
+在 Finder 中依關鍵字篩選子資料夾，適合 NAS 上大量資料夾的瀏覽情境。
 
 ## 快速開始
 
-### 安裝
+### 前置條件
 
-```bash
-git clone https://github.com/tmumark/nas-mount-toolkit.git
-cd nas-mount-toolkit
-```
+- macOS 14+（Apple Silicon）
+- FortiClient VPN 已設定好，VPN 名稱為 `VPN`
+- Xcode Command Line Tools：`xcode-select --install`
 
-### 設定 NAS 連線
+### 首次設定
 
-```bash
-# 複製範本並改名
-cp mount_nas_example.command mount_nas.command
+1. **修改 NAS 連線設定**
 
-# 編輯腳本，將 YOUR_NAS_IP、YOUR_USERNAME、YOUR_PASSWORD 換成你的資訊
-nano mount_nas.command
+   編輯 `menubar/ConnectionManager.swift` 與 `scripts/mount-nas-silent.sh`：
+   ```
+   NAS_IP   = 你的 NAS IP
+   NAS_USER = 你的 NAS 帳號
+   SHARES   = 要掛載的共享資料夾名稱（陣列）
+   ```
 
-# 設定執行權限
-chmod +x mount_nas.command
-```
+2. **互動版腳本存密碼到鑰匙圈**
+   ```bash
+   ./scripts/mount-nas.sh
+   ```
+   依提示輸入帳密，最後選 `y` 存入鑰匙圈。
 
-### 掛載 NAS
+3. **編譯並安裝選單列 App**
+   ```bash
+   cd menubar
+   ./build.sh install
+   ```
+   完成後選單列右上會出現狀態圖示。
 
-```bash
-# 方法一：在 Finder 雙擊 mount_nas.command
-# 方法二：終端機執行
-./mount_nas.command
-```
+4. **設定開機自動啟動**（可選）
 
-### 使用資料夾篩選
+   系統設定 → 一般 → 登入項目 → 加入 `/Applications/NASMenuBar.app`
 
-1. 用 Script Editor 打開 `FilterFolders.applescript`
-2. 選擇 File > Export > Application 匯出為 .app
-3. 將 .app 拖到 Finder 工具列
-4. 在 NAS 資料夾中點擊即可篩選
+## 疑難排解
 
-## 檔案結構
-
-```
-.
-├── mount_nas_example.command   # NAS 掛載腳本（範本，需填入你的連線資訊）
-├── FilterFolders.applescript   # 資料夾篩選工具原始碼
-├── NASMenuBar.app/             # 選單列工具（arm64 binary）
-└── README.md
-```
-
-## 安全注意事項
-
-- `mount_nas_example.command` 使用佔位符，不含真實密碼
-- 複製為 `mount_nas.command` 後填入密碼，該檔已加入 `.gitignore` 不會被上傳
-
-## 系統需求
-
-- macOS 12+ (Monterey 或更新)
-- NASMenuBar.app 僅支援 Apple Silicon
+| 症狀 | 解法 |
+|---|---|
+| 鑰匙圈找不到密碼 | 重新執行 `scripts/mount-nas.sh` 並選擇存入鑰匙圈 |
+| 密碼改了掛載失敗 | `security delete-internet-password -s NAS_IP` 清舊密碼，再跑 mount-nas.sh |
+| Finder 卡住「正在連接」 | 不要用 Finder Cmd+K，改用本工具的 `mount_smbfs` 方式 |
+| 選單列顯示 🔴 | FortiClient VPN 未連線，或 VPN 名稱不是「VPN」 |
 
 ## License
 
