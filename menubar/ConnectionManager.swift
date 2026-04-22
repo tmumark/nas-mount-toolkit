@@ -9,7 +9,7 @@ class ConnectionManager: ObservableObject {
 
     let nasIP = "192.168.1.250"
     let nasUser = "mark"
-    let shares = ["相片", "共用資料", "個人備份及公共區"]
+    let shares = ["相片", "共用資料", "個人備份及公共區", "管理文件及網站", "acc", "進案請款專區"]
 
     // 掛載基底目錄：避開 /Volumes/ 的權限問題
     var mountBase: String { NSHomeDirectory() + "/NAS" }

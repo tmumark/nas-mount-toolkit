@@ -5,7 +5,7 @@ set -u
 
 NAS_IP="192.168.1.250"
 NAS_USER="mark"
-SHARES=("共用資料" "相片" "個人備份及公共區")
+SHARES=("共用資料" "相片" "個人備份及公共區" "管理文件及網站" "acc" "進案請款專區")
 MOUNT_BASE="$HOME/NAS"
 
 notify() {
